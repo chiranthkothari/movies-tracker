@@ -4,6 +4,11 @@ import telegram
 import asyncio
 import os
 from time import sleep
+from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+
+app = FastAPI()
 
 last_movie = ""
 bot = telegram.Bot(os.environ["BOT_KEY"])
@@ -25,6 +30,7 @@ def get_last_movie():
         last_movie = file.read()
 
 
+@app.get("/track/")
 async def scrape_site():
     get_last_movie()
     url = 'https://www.1tamilblasters.tel/'
@@ -42,11 +48,10 @@ async def scrape_site():
         for tag in item.find_all():
             tag.unwrap()
         p_tags[index] = item.get_text().strip().strip("-").strip()
-    for p in p_tags[:p_tags.index(last_movie)]:
+    filtered_movies= p_tags[:p_tags.index(last_movie)]
+    for p in filtered_movies:
         await send_message(p)
-    print("Worker sleeping")
-    sleep(3600)
-    await scrape_site()
+    return JSONResponse(status_code=200, content=jsonable_encoder({"movies": filtered_movies}), media_type="application/json")
 
 
 if __name__ == "__main__":
