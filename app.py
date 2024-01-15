@@ -2,9 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 import telegram
 import asyncio
+import os
 
 last_movie = ""
-bot = telegram.Bot()
+bot = telegram.Bot(os.environ["BOT_KEY"])
 
 
 async def send_message(message):
