@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import telegram
 import asyncio
 import os
+from time import sleep
 
 last_movie = ""
 bot = telegram.Bot(os.environ["BOT_KEY"])
@@ -37,15 +38,15 @@ async def scrape_site():
     p_tags = div.find_all("p")[3:]
     with open('last_movie.txt', 'w') as file:
         file.write(p_tags[0].get_text().strip().strip("-").strip())
-    for p in p_tags:
-        for tag in p.find_all():
+    for index, item in enumerate(p_tags):
+        for tag in item.find_all():
             tag.unwrap()
-    for p in p_tags:
-        p_text = p.get_text().strip().strip("-").strip()
-        if (last_movie == p_text):
-            return
-        else:
-            await send_message(p_text)
+        p_tags[index] = item.get_text().strip().strip("-").strip()
+    for p in p_tags[:p_tags.index(last_movie)]:
+        await send_message(p)
+    print("Worker sleeping")
+    sleep(3600)
+    await scrape_site()
 
 
 if __name__ == "__main__":
