@@ -31,6 +31,11 @@ async def send_message(message):
         print(e)
 
 
+@app.get("/wake")
+async def wake_service():
+    return JSONResponse(status_code=200, content=jsonable_encoder({"message": f"Woke up service at {datetime.now().isoformat()}"}), media_type="application/json")
+
+
 @app.get("/track/")
 async def scrape_site():
     last_movie = db.collection(
